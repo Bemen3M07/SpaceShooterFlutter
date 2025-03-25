@@ -8,12 +8,35 @@ import 'package:flame/parallax.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(GameWidget(game: SpaceShooterGame()));
+  final game = SpaceShooterGame();
+  runApp(
+    MaterialApp(
+      home: Scaffold(
+        body: Stack(
+          children: [
+            GameWidget(game: game),
+            Positioned(
+              top: 40,
+              right: 20,
+              child: FloatingActionButton(
+                onPressed: game.togglePause,
+                child: Icon(Icons.pause),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class SpaceShooterGame extends FlameGame
     with PanDetector, HasCollisionDetection {
   late Player player;
+  bool isPaused = false;
+
+  @override
+  Color backgroundColor() => const Color.fromARGB(255, 126, 4, 4);
 
   @override
   Future<void> onLoad() async {
@@ -40,12 +63,24 @@ class SpaceShooterGame extends FlameGame
   }
 
   @override
+  void update(double dt) {
+    if (isPaused) return;
+    super.update(dt);
+  }
+
+  void togglePause() {
+    isPaused = !isPaused;
+  }
+
+  @override
   void onPanUpdate(DragUpdateInfo info) {
+    if (isPaused) return;
     player.move(info.delta.global);
   }
 
   @override
   void onPanStart(DragStartInfo info) {
+    if (isPaused) return;
     player.startShooting();
   }
 
